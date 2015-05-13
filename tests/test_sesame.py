@@ -167,3 +167,46 @@ def test_directory(tmpdir, subprocess, cd, create_test_file, password):
         # verify decrypted file contents
         with open(test_file_path, 'r') as f:
             assert test_file_contents == f.read()
+
+
+def test_output_dir(tmpdir, subprocess, cd, create_test_file, password):
+    """
+    Single file test, using relative paths
+    The decrypted file should be placed in the supplied directory
+    Encrypted filename should default to inputfile + '.sesame'
+    """
+    # create a single test file
+    test_file_path = 'file.test'
+    test_file_contents = str(uuid.uuid4())
+    output_dir = 'test_output_dir'
+
+    with cd(tmpdir.strpath):
+        create_test_file(test_file_path, test_file_contents)
+
+        # encrypt the test file - passing relative path
+        ret, stdout, stderr = subprocess(
+            'sesame.sh e -p {} {}'.format(password, test_file_path)
+        )
+        assert ret == 0, stderr
+
+        # ensure output file has been created
+        assert os.path.exists('{}.sesame'.format(test_file_path))
+
+        # delete input file (to test decrypt)
+        os.remove(test_file_path)
+
+        # decrypt the test file
+        ret, stdout, stderr = subprocess(
+            'sesame.sh d -p {} -O {} {}.sesame'.format(password, output_dir, test_file_path)
+        )
+        assert ret == 0, stderr
+
+        # decrypted file path will now include supplied output directory
+        decrypted_path = os.path.join(output_dir, test_file_path)
+
+        # ensure decrypted file has been created
+        assert os.path.exists(decrypted_path)
+
+        # verify decrypted contents
+        with open(decrypted_path, 'r') as f:
+            assert test_file_contents == f.read()

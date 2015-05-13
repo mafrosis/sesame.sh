@@ -29,7 +29,8 @@ positional arguments:
 optional arguments:
   -h                    show this help message and exit
   -p PASSWORD           decryption password
-  -f                    force overwrite of existing decrypted file(s)'
+  -f                    force overwrite of existing decrypted file(s)
+  -O OUTPUT_DIR         extract files into a specific directory'
 
 if [[ $# -eq 0 ]]; then
 	echo "$USAGE" 1>&2
@@ -45,16 +46,25 @@ if [[ $COMMAND != 'e' && $COMMAND != 'd' ]]; then
 	exit 1
 fi
 
+# different getopts setup for encrypt/decrypt
+if [[ $COMMAND = 'e' ]]; then
+	OPTIONS='hp:f'
+elif [[ $COMMAND = 'd' ]]; then
+	OPTIONS='hp:fO:'
+fi
+
 PASSWORD=''
 FORCE=0
+OUTPUT_DIR='.'
 HELP=0
 
-while getopts 'hp:f' options
+while getopts $OPTIONS options
 do
 	case $options in
 	h ) HELP=1;;
 	p ) PASSWORD="$OPTARG";;
 	f ) FORCE=1;;
+	O ) OUTPUT_DIR="$OPTARG";;
 	esac
 done
 shift $((OPTIND-1))
@@ -170,7 +180,8 @@ function decrypt {
 	local INPUTFILE="$1"
 	local PASSWORD="$2"
 	local FORCE="$3"
-	shift 3
+	local OUTPUT_DIR="$4"
+	shift 4
 
 	# decrypt the input file
 	if [[ -z $PASSWORD ]]; then
@@ -191,8 +202,17 @@ function decrypt {
 		done
 	fi
 
+	# check and attempt create directory at $OUTPUT_DIR
+	if [[ ! -d "$OUTPUT_DIR" ]]; then
+		mkdir "$OUTPUT_DIR"
+		if [[ $? -gt 0 ]]; then
+			printf "\nCouldn't create %s\n" "$OUTPUT_DIR" 1>&2
+			return 5
+		fi
+	fi
+
 	# all encrypted files are tarballs; untar it
-	tar xzf "$TMPDIR/sesame.tar" 1>/dev/null 2>&1
+	tar xzf "$TMPDIR/sesame.tar" -C "$OUTPUT_DIR" 1>/dev/null 2>&1
 }
 
 
@@ -202,7 +222,7 @@ TMPDIR=$(mktemp -dt 'sesame')
 if [[ $COMMAND = 'e' ]]; then
 	encrypt "$OUTPUTFILE" "$PASSWORD" "$FORCE" "$@"
 else
-	decrypt "$INPUTFILE" "$PASSWORD" "$FORCE" "$@"
+	decrypt "$INPUTFILE" "$PASSWORD" "$FORCE" "$OUTPUT_DIR" "$@"
 fi
 
 # exit with return code from encrypt/decrypt
