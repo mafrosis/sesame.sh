@@ -18,7 +18,8 @@ positional arguments:
 
 optional arguments:
   -h                    show this help message and exit
-  -p PASSWORD           encryption password'
+  -p PASSWORD           encryption password
+  -f                    force overwrite of existing encrypted file'
 
 USAGE_D='sesame.sh d [-h] [-p password] [-f] [-O OUTPUT_DIR] inputfile
 
@@ -27,7 +28,8 @@ positional arguments:
 
 optional arguments:
   -h                    show this help message and exit
-  -p PASSWORD           decryption password'
+  -p PASSWORD           decryption password
+  -f                    force overwrite of existing decrypted file(s)'
 
 if [[ $# -eq 0 ]]; then
 	echo "$USAGE"
@@ -44,13 +46,15 @@ if [[ $COMMAND != 'e' && $COMMAND != 'd' ]]; then
 fi
 
 PASSWORD=''
+FORCE=0
 HELP=0
 
-while getopts 'hp:' options
+while getopts 'hp:f' options
 do
 	case $options in
 	h ) HELP=1;;
 	p ) PASSWORD="$OPTARG";;
+	f ) FORCE=1;;
 	esac
 done
 shift $((OPTIND-1))
@@ -137,7 +141,8 @@ function check_exists {
 function encrypt {
 	local OUTPUTFILE="$1"
 	local PASSWORD="$2"
-	shift 2
+	local FORCE="$3"
+	shift 3
 
 	# all input paths are tarballed first
 	tar czf "$TMPDIR/sesame.tar" "$@" 1>/dev/null 2>&1
@@ -146,8 +151,10 @@ function encrypt {
 		return $?
 	fi
 
-	# check output file does not already exist
-	check_exists "$OUTPUTFILE" || return $?
+	if [[ $FORCE -eq 0 ]]; then
+		# check output file does not already exist
+		check_exists "$OUTPUTFILE" || return $?
+	fi
 
 	# encrypt the tarball
 	if [[ -z $PASSWORD ]]; then
@@ -166,7 +173,8 @@ function encrypt {
 function decrypt {
 	local INPUTFILE="$1"
 	local PASSWORD="$2"
-	shift 2
+	local FORCE="$3"
+	shift 3
 
 	# decrypt the input file
 	if [[ -z $PASSWORD ]]; then
@@ -184,10 +192,12 @@ function decrypt {
 		return $?
 	fi
 
-	# check all paths to ensure they don't already exist
-	for P in $(tar tf "$TMPDIR/sesame.tar"); do
-		check_exists "$P" || return $?
-	done
+	if [[ $FORCE -eq 0 ]]; then
+		# check all paths to ensure they don't already exist
+		for P in $(tar tf "$TMPDIR/sesame.tar"); do
+			check_exists "$P" || return $?
+		done
+	fi
 
 	# all encrypted files are tarballs; untar it
 	tar xzf "$TMPDIR/sesame.tar" 1>/dev/null 2>&1
@@ -198,9 +208,9 @@ function decrypt {
 TMPDIR=$(mktemp -dt 'sesame')
 
 if [[ $COMMAND = 'e' ]]; then
-	encrypt "$OUTPUTFILE" "$PASSWORD" "$@"
+	encrypt "$OUTPUTFILE" "$PASSWORD" "$FORCE" "$@"
 else
-	decrypt "$INPUTFILE" "$PASSWORD" "$@"
+	decrypt "$INPUTFILE" "$PASSWORD" "$FORCE" "$@"
 fi
 
 # exit with return code from encrypt/decrypt
