@@ -114,6 +114,26 @@ if [[ $END -ne 0 ]]; then
 fi
 
 
+function check_exists {
+	# check output file already exists
+	if [[ -f $1 || -d $1 ]]; then
+		read -t 5 -p "File exists at ${1}. Overwrite? [y/N] " -n1 -s
+		if [[ $? -gt 0 ]]; then
+			printf '\nAborted on timeout\n'
+			return 4
+		fi
+		echo ''
+	else
+		REPLY=y
+	fi
+
+	# abort if not overwriting
+	if [[ $REPLY =~ ^[Nn]$ ]]; then
+		return 3
+	fi
+}
+
+
 function encrypt {
 	local OUTPUTFILE="$1"
 	local PASSWORD="$2"
@@ -125,6 +145,9 @@ function encrypt {
 	if [[ $? -gt 0 ]]; then
 		return $?
 	fi
+
+	# check output file does not already exist
+	check_exists "$OUTPUTFILE" || return $?
 
 	# encrypt the tarball
 	if [[ -z $PASSWORD ]]; then
@@ -160,6 +183,11 @@ function decrypt {
 	if [[ $? -gt 0 ]]; then
 		return $?
 	fi
+
+	# check all paths to ensure they don't already exist
+	for P in $(tar tf "$TMPDIR/sesame.tar"); do
+		check_exists "$P" || return $?
+	done
 
 	# all encrypted files are tarballs; untar it
 	tar xzf "$TMPDIR/sesame.tar" 1>/dev/null 2>&1
