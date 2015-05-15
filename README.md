@@ -17,3 +17,7 @@ Use the following to install `pytest` and run the tests (assumes working Python 
 
     sudo pip install pytest
     py.test
+
+A couple of the tests run for 5 seconds (waiting for a timeout from bash's `read`), you can run all but the slow tests with:
+
+    py.test -m 'not slow'

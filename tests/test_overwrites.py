@@ -4,7 +4,10 @@ from __future__ import unicode_literals
 import os
 import uuid
 
+import pytest
 
+
+@pytest.mark.slow
 def test_encrypt_file_already_exists(tmpdir, subprocess, cd, create_test_file, password):
     """
     Single file test, using relative paths
@@ -38,6 +41,7 @@ def test_encrypt_file_already_exists(tmpdir, subprocess, cd, create_test_file, p
         assert 'Aborted on timeout' in stdout
 
 
+@pytest.mark.slow
 def test_decrypt_file_already_exists(tmpdir, subprocess, cd, create_test_file, password):
     """
     Single file test, using relative paths
