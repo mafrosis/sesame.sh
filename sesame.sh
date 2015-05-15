@@ -145,11 +145,7 @@ function encrypt {
 	shift 3
 
 	# all input paths are tarballed first
-	tar czf "$TMPDIR/sesame.tar" "$@" 1>/dev/null 2>&1
-
-	if [[ $? -gt 0 ]]; then
-		return $?
-	fi
+	tar czf "$TMPDIR/sesame.tar" "$@" 1>/dev/null 2>&1 || return $?
 
 	if [[ $FORCE -eq 0 ]]; then
 		# check output file does not already exist
@@ -180,16 +176,12 @@ function decrypt {
 	if [[ -z $PASSWORD ]]; then
 		openssl cast5-cbc -d \
 			-in "$INPUTFILE" \
-			-out "$TMPDIR/sesame.tar"
+			-out "$TMPDIR/sesame.tar" || return $?
 	else
 		openssl cast5-cbc -d \
 			-k "$PASSWORD" \
 			-in "$INPUTFILE" \
-			-out "$TMPDIR/sesame.tar"
-	fi
-
-	if [[ $? -gt 0 ]]; then
-		return $?
+			-out "$TMPDIR/sesame.tar" || return $?
 	fi
 
 	if [[ $FORCE -eq 0 ]]; then
