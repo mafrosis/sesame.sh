@@ -32,7 +32,7 @@ optional arguments:
   -f                    force overwrite of existing decrypted file(s)'
 
 if [[ $# -eq 0 ]]; then
-	echo "$USAGE"
+	echo "$USAGE" 1>&2
 	exit 1
 fi
 
@@ -41,7 +41,7 @@ COMMAND=$1
 shift
 
 if [[ $COMMAND != 'e' && $COMMAND != 'd' ]]; then
-	echo "$USAGE"
+	echo "$USAGE" 1>&2
 	exit 1
 fi
 
@@ -63,11 +63,11 @@ shift $((OPTIND-1))
 # handle -h flag
 if [[ $HELP -eq 1 ]]; then
 	if [[ $COMMAND = 'e' ]]; then
-		echo "$USAGE_E"
+		echo "$USAGE_E" 1>&2
 	elif [[ $COMMAND = 'd' ]]; then
-		echo "$USAGE_D"
+		echo "$USAGE_D" 1>&2
 	else
-		echo "$USAGE"
+		echo "$USAGE" 1>&2
 	fi
 	exit 1
 fi
@@ -92,7 +92,7 @@ if [[ $COMMAND = 'e' ]]; then
 			OUTPUTFILE="${OUTPUTFILE}.sesame"
 		fi
 
-		echo "Defaulting to ${OUTPUTFILE} as output filename"
+		echo "Defaulting to ${OUTPUTFILE} as output filename" 1>&2
 	else
 		shift
 	fi
@@ -107,7 +107,7 @@ fi
 END=0
 for P in "$@"; do
 	if [[ ! -f "$P" && ! -d "$P" ]]; then
-		echo "Path not valid: $P"
+		echo "Path not valid: $P" 1>&2
 		END=1
 	fi
 done
