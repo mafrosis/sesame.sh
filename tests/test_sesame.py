@@ -22,6 +22,7 @@ def test_single_file_relative_paths(tmpdir, subprocess, cd, create_test_file, pa
         ret, stdout, stderr = subprocess(
             'sesame.sh e -p {} {}'.format(password, test_file_path)
         )
+        assert ret == 0, stderr
 
         # ensure output file has been created
         assert os.path.exists('{}.sesame'.format(test_file_path))
@@ -33,6 +34,7 @@ def test_single_file_relative_paths(tmpdir, subprocess, cd, create_test_file, pa
         ret, stdout, stderr = subprocess(
             'sesame.sh d -p {} {}.sesame'.format(password, test_file_path)
         )
+        assert ret == 0, stderr
 
         # ensure decrypted file has been created
         assert os.path.exists(test_file_path)
@@ -58,6 +60,7 @@ def test_single_file_absolute_paths(tmpdir, subprocess, cd, create_test_file, pa
         ret, stdout, stderr = subprocess(
             'sesame.sh e -p {} {}'.format(password, test_file_path)
         )
+        assert ret == 0, stderr
 
         # ensure output file has been created
         assert os.path.exists('{}.sesame'.format(test_file_path))
@@ -71,6 +74,7 @@ def test_single_file_absolute_paths(tmpdir, subprocess, cd, create_test_file, pa
                 password, os.path.join(tmpdir.strpath, test_file_path)
             )
         )
+        assert ret == 0, stderr
 
         # verify decrypted contents at the absolute extracted path
         with open(test_file_path, 'r') as f:
@@ -100,6 +104,7 @@ def test_multiple_files(tmpdir, subprocess, cd, create_test_file, password):
                 password, output_filename, ' '.join(test_file_paths.keys())
             )
         )
+        assert ret == 0, stderr
 
         # ensure output file has been created
         assert os.path.exists(output_filename)
@@ -112,6 +117,7 @@ def test_multiple_files(tmpdir, subprocess, cd, create_test_file, password):
         ret, stdout, stderr = subprocess(
             'sesame.sh d -p {} {}'.format(password, output_filename)
         )
+        assert ret == 0, stderr
 
         # ensure decrypted files have been created
         for path in test_file_paths.keys():
@@ -140,6 +146,7 @@ def test_directory(tmpdir, subprocess, cd, create_test_file, password):
         ret, stdout, stderr = subprocess(
             'sesame.sh e -p {} {}'.format(password, test_dir_path)
         )
+        assert ret == 0, stderr
 
         # ensure output file has been created
         assert os.path.exists('{}.sesame'.format(test_dir_path))
@@ -151,6 +158,7 @@ def test_directory(tmpdir, subprocess, cd, create_test_file, password):
         ret, stdout, stderr = subprocess(
             'sesame.sh d -p {} {}.sesame'.format(password, test_dir_path)
         )
+        assert ret == 0, stderr
 
         # ensure decrypted dir and file have been created
         assert os.path.exists(test_dir_path)
