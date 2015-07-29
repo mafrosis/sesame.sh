@@ -217,7 +217,7 @@ function decrypt {
 
 
 # create a temporary working dir
-TMPDIR=$(mktemp -dt 'sesame')
+TMPDIR=$(mktemp -d "$TMPDIR/sesame.XXXXXXXX")
 
 if [[ $COMMAND = 'e' ]]; then
 	encrypt "$OUTPUTFILE" "$PASSWORD" "$FORCE" "$@"
