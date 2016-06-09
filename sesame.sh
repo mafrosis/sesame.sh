@@ -1,4 +1,5 @@
-#! /bin/bash
+#! /bin/bash -eu
+set -o pipefail
 
 USAGE='sesame.sh {e|d} [-h]
 
@@ -131,7 +132,7 @@ fi
 function check_exists {
 	# check output file already exists
 	if [[ -f $1 || -d $1 ]]; then
-		read -t 5 -p "File exists at ${1}. Overwrite? [y/N] " -n1 -s
+		read -r -t 5 -p "File exists at ${1}. Overwrite? [y/N] " -n1 -s
 		if [[ $? -gt 0 ]]; then
 			printf '\nAborted on timeout\n'
 			return 4
