@@ -220,6 +220,9 @@ function decrypt {
 # create a temporary working dir
 TMPDIR=$(mktemp -d "$TMPDIR/sesame.XXXXXXXX")
 
+# trap EXIT and cleanup
+trap 'rm -rf "$TMPDIR"' EXIT
+
 if [[ $COMMAND = 'e' ]]; then
 	encrypt "$OUTPUTFILE" "$PASSWORD" "$FORCE" "$@"
 else
@@ -228,6 +231,3 @@ fi
 
 # exit with return code from encrypt/decrypt
 exit $?
-
-# clean up the tmp dir
-trap 'rm -rf "$TMPDIR"' EXIT
