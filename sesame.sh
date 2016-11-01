@@ -218,6 +218,7 @@ function decrypt {
 
 
 # create a temporary working dir
+TMPDIR=${TMPDIR:-/tmp}
 TMPDIR=$(mktemp -d "$TMPDIR/sesame.XXXXXXXX")
 
 # trap EXIT and cleanup
