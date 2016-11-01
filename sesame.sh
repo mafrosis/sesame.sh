@@ -132,8 +132,7 @@ fi
 function check_exists {
 	# check output file already exists
 	if [[ -f $1 || -d $1 ]]; then
-		read -r -t 5 -p "File exists at ${1}. Overwrite? [y/N] " -n1 -s
-		if [[ $? -gt 0 ]]; then
+		if ! read -r -t 5 -p "File exists at ${1}. Overwrite? [y/N] " -n1 -s; then
 			printf '\nAborted on timeout\n'
 			return 4
 		fi
@@ -205,8 +204,7 @@ function decrypt {
 
 	# check and attempt create directory at $OUTPUT_DIR
 	if [[ ! -d "$OUTPUT_DIR" ]]; then
-		mkdir "$OUTPUT_DIR"
-		if [[ $? -gt 0 ]]; then
+		if ! mkdir "$OUTPUT_DIR"; then
 			printf "\nCouldn't create %s\n" "$OUTPUT_DIR" 1>&2
 			return 5
 		fi
